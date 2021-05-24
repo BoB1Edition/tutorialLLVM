@@ -1,5 +1,6 @@
 use std::mem;
 use std::io;
+use std::io::Read;
 
 #[allow(dead_code)]
 enum Token {
@@ -12,24 +13,36 @@ enum Token {
   tok_identifier = -4, tok_number = -5,
 }
 
-static mut guess: String = String::new();
+
 static mut NumVal: f64 = 0.0; 
 
-fn getchar() -> char {
-    let buf: char;
-    let r = io::stdin().read(&mut buf);
-    return '\n';
+fn getchar() -> Option<char> {
+    let input = io::stdin().bytes() 
+    .next()
+    .and_then(|result| result.ok())
+    .map(|byte| byte as char);
+    
+    return input;
 }
 
-fn gettok() {
+fn gettok(data: String) {
     let mut LastChar = ' ';
+    let mut IdentifierStr = String::new();
     while LastChar == ' ' {
-        LastChar = getchar();
+        LastChar = getchar().unwrap();
     }
-    println!("Hello, world! {}", mem::size_of_val(&LastChar));
+    if LastChar.is_alphabetic() {
+        IdentifierStr = LastChar.to_string();
+        LastChar = getchar().unwrap();
+        while LastChar.is_alphanumeric() {
+            IdentifierStr.push_str(&LastChar.to_string());
+        }
+        println!("Hello, world! {}", IdentifierStr);
+    }
 }
 
 fn main() {
     println!("Hello, world!");
-    gettok();
+    let s = "def test()";
+    gettok(s.to_string());
 }
